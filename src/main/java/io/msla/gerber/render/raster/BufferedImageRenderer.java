@@ -13,23 +13,30 @@ public class BufferedImageRenderer {
     @Getter private BufferedImage image;
     private final Double scale;
     private Point2D gerberCenter;
+    private Double width;
+    private Double height;
 
     public BufferedImageRenderer(Double scale) {
-        this.image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
         this.scale = scale;
     }
 
     public void render(Layer layer, Color color) throws RenderException {
-        if ((layer.getWidth() == null) || layer.getHeight() == null) {
-            System.out.println("Rendering on an exising canvas as layer dimensions are unknown");
-        } else {
-            this.image = new BufferedImage(
-                    (int) (layer.getWidth() / scale),
-                    (int) (layer.getHeight() / scale),
-                    BufferedImage.TYPE_INT_RGB);
+        // New size of image
+        if (width == null || (layer.getWidth() != null && width < layer.getWidth() / scale)) width = layer.getWidth() / scale;
+        if (height == null || (layer.getHeight() != null && height < layer.getWidth() / scale)) height = layer.getHeight() / scale;
+
+        // Create final rendered image if not set
+        if (this.image == null) {
+            if (width == null || height == null) throw new RenderException("Can't render, dimensions are unknown");
+            this.image = new BufferedImage(width.intValue(), height.intValue(), BufferedImage.TYPE_INT_ARGB);
         }
 
-        var canvas = new GraphicsCanvas((Graphics2D) this.image.getGraphics());
+        // Create temporary image
+        var tmpImage = new BufferedImage(width.intValue(), height.intValue(), BufferedImage.TYPE_INT_ARGB);
+        var tmpGraphics = tmpImage.createGraphics();
+        var canvas = new GraphicsCanvas(tmpGraphics);
+
+        tmpGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         if (layer instanceof Gerber) {
             gerberCenter = new Point2D.Double(-layer.getMinX(), layer.getMaxY());
@@ -37,15 +44,24 @@ public class BufferedImageRenderer {
             var gerberRenderer = new GerberRenderer(canvas, scale,
                     new Point2D.Double(-layer.getMinX(), layer.getMaxY())
             );
+            gerberRenderer.setColor(new Color(color.getRGB()));
             gerberRenderer.setApertures(gerberData.getApertures(layer.getLayerType()));
             gerberRenderer.setMacros(gerberData.getMacros(layer.getLayerType()));
-            gerberRenderer.draw(layer, new Point2D.Double(0, 0), color);
+            gerberRenderer.draw(layer, new Point2D.Double(0, 0));
         }
 
         else if (layer instanceof Excellon) {
             if (gerberCenter == null) throw new RenderException("Excellon DRL can only be rendered after Gerber layer");
             var drlRenderer = new ExcellonRenderer(canvas, scale, gerberCenter);
-            drlRenderer.draw(layer, new Point2D.Double(0, 0), color);
+            drlRenderer.setColor(new Color(color.getRGB()));
+            drlRenderer.draw(layer, new Point2D.Double(0, 0));
         }
+        tmpGraphics.dispose();
+
+        // Compose images
+        var graphics = image.createGraphics();
+        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, color.getAlpha() / 255.f));
+        graphics.drawImage(tmpImage, 0, 0, null);
+        graphics.dispose();
     }
 }

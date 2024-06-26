@@ -32,12 +32,16 @@ public class GerberTests extends Common {
         var reader = new GerberReader(new FileInputStream(resourceFile("gerbers/tiny1616_dev_board-B_Cu.gbr")));
         var gerber = reader.read("Copper Back Title");
 
+        var reader2 = new GerberReader(new FileInputStream(resourceFile("gerbers/tiny1616_dev_board-F_Cu.gbr")));
+        var gerber2 = reader2.read("Copper Front Title");
+
         var drlReader = new ExcellonReader(new FileInputStream(resourceFile("gerbers/tiny1616_dev_board-PTH.drl")));
         var drl = drlReader.read("Top through holes");
 
         var renderer = new BufferedImageRenderer(0.02);
-        renderer.render(gerber, Color.ORANGE);
-        renderer.render(drl, Color.WHITE);
+        renderer.render(gerber, new Color(0, 255, 0, 170));
+        renderer.render(gerber2, new Color(255, 0, 0, 170));
+        renderer.render(drl, new Color(0,0, 0));
 
         var image = renderer.getImage();
         ImageIO.write(image, "png", new File("rendered_gerber.png"));

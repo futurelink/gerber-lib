@@ -2,6 +2,7 @@ package io.msla.gerber.render.raster;
 
 import io.msla.gerber.Layer;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -10,13 +11,14 @@ import java.awt.geom.Point2D;
 abstract public class LayerRenderer {
     private final Double scale;
     private final Point2D center;
+    @Setter private Color color;
 
     protected LayerRenderer(Double scale, Point2D center) {
         this.scale = scale;
         this.center = center;
     }
 
-    abstract public void draw(Layer g, final Point2D offset, Color color);
+    abstract public void draw(Layer g, final Point2D offset);
 
     protected Point2D translatedPoint(Double x, Double y, Point2D offset) {
         if (offset == null) {

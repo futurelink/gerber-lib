@@ -25,7 +25,7 @@ public class GraphicsCanvas {
 
     void drawPolygon(Point2D[] points) {
         var poly = new java.awt.Polygon();
-        for (var point : points) poly.addPoint((int) point.getX(), (int) point.getY());
+        for (var point : points) poly.addPoint((int) Math.round(point.getX()), (int) Math.round(point.getY()));
 
         if (brush != null) {
             logger.fine("Filled polygon of " + points.length + " points");
@@ -43,14 +43,16 @@ public class GraphicsCanvas {
     }
 
     void drawPolygon(Polygon polygon) {
-        if (pen != null) drawPolygon(polygon.getPoints());
+        drawPolygon(polygon.getPoints());
     }
 
     void drawArc(Rectangle2D rect, Integer start, Integer end) {
         logger.fine("Arc " + rect.toString() + " - " + start + " to " + end);
         graphics.setColor(pen.getColor());
         graphics.setStroke(pen.getStroke());
-        graphics.drawArc((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight(), start, end);
+        graphics.drawArc(
+                (int) Math.round(rect.getX()), (int) Math.round(rect.getY()),
+                (int) Math.round(rect.getWidth()), (int) Math.round(rect.getHeight()), start, end);
     }
 
     void drawLine(Point2D start, Point2D end) {
@@ -58,7 +60,9 @@ public class GraphicsCanvas {
         if (pen != null) {
             graphics.setColor(pen.getColor());
             graphics.setStroke(pen.getStroke());
-            graphics.drawLine((int) start.getX(), (int) start.getY(), (int) end.getX(), (int) end.getY());
+            graphics.drawLine(
+                    (int) Math.round(start.getX()), (int) Math.round(start.getY()),
+                    (int) Math.round(end.getX()), (int) Math.round(end.getY()));
         }
     }
 
@@ -67,14 +71,19 @@ public class GraphicsCanvas {
             logger.fine("Filled ellipse color " + brush.getColor() + ": " + center.toString() + " - " + radius1 + " x " + radius2);
             graphics.setColor(brush.getColor());
             if (pen != null) graphics.setStroke(pen.getStroke());
-            graphics.fillOval((int) (center.getX() - radius1), (int) (center.getY() - radius2), radius1.intValue() * 2, radius2.intValue() * 2);
+            graphics.fillOval(
+                    (int) Math.round(center.getX() - radius1),
+                    (int) Math.round(center.getY() - radius2),
+                    radius1.intValue() * 2, radius2.intValue() * 2);
         }
 
         if (pen != null) {
             logger.fine("Outline ellipse color " + pen.getColor() + ": " + center.toString() + " - " + radius1 + " x " + radius2);
             graphics.setColor(pen.getColor());
             graphics.setStroke(pen.getStroke());
-            graphics.drawOval((int) center.getX(), (int) center.getY(), radius1.intValue(), radius2.intValue());
+            graphics.drawOval(
+                    (int) Math.round(center.getX()), (int) Math.round(center.getY()),
+                    radius1.intValue(), radius2.intValue());
         }
     }
 
@@ -83,14 +92,18 @@ public class GraphicsCanvas {
             logger.fine("Filled rect " + rect.toString());
             graphics.setColor(brush.getColor());
             if (pen != null) graphics.setStroke(pen.getStroke());
-            graphics.fillRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight());
+            graphics.fillRect(
+                    (int) Math.round(rect.getX()), (int) Math.round(rect.getY()),
+                    (int) Math.round(rect.getWidth()), (int) Math.round(rect.getHeight()));
         }
 
         if (pen != null) {
             logger.fine("Outline rect " + rect.toString());
             graphics.setColor(pen.getColor());
             graphics.setStroke(pen.getStroke());
-            graphics.drawRect((int) rect.getX(), (int) rect.getY(), (int) rect.getWidth(), (int) rect.getHeight());
+            graphics.drawRect(
+                    (int) Math.round(rect.getX()), (int) Math.round(rect.getY()),
+                    (int) Math.round(rect.getWidth()), (int) Math.round(rect.getHeight()));
         }
     }
 

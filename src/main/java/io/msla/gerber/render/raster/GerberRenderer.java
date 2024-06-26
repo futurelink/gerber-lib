@@ -44,14 +44,14 @@ public final class GerberRenderer extends LayerRenderer {
     }
 
     @Override
-    public void draw(Layer layer, final Point2D offset, Color color) {
+    public void draw(Layer layer, final Point2D offset) {
         Aperture currentAperture = null;
         var currentInterpolation = Geometry.Interpolation.LINEAR;
         var currentPoint = new Point2D.Double(0, 0);
         var polygonMode = false;
         var polygonPoints = new ArrayList<Point2D>();
-        var brush = new Brush(color);
-        var pen = new Pen(color, 1.0);
+        var brush = new Brush(getColor());
+        var pen = new Pen(getColor(), 1.0);
 
         canvas.setPen(null);
         canvas.setBrush(null);
@@ -180,13 +180,21 @@ public final class GerberRenderer extends LayerRenderer {
             switch (r.getType()) {
                 case Circle -> {
                     var dia = r.getValue(0) / getScale() / 2;
-                    var center = addPoints(new Point2D.Double(r.getValue(1) / getScale(), -r.getValue(2) / getScale()), p);
+                    var center = addPoints(
+                            new Point2D.Double(
+                                    r.getValue(1) / getScale(),
+                                    -r.getValue(2) / getScale()),
+                            p);
                     canvas.drawEllipse(center, dia, dia);
                 }
                 case Outline -> {
                     var poly = new Polygon();
-                    for (var i = 0; i < r.getValue(0) * 2; i+=2) {
-                        poly.append(addPoints(new Point2D.Double(r.getValue(i+1) / getScale(), -r.getValue(i+2) / getScale()), p));
+                    for (var i = 0; i < r.getValue(0) * 2; i += 2) {
+                        poly.append(addPoints(
+                                new Point2D.Double(
+                                        r.getValue(i+1) / getScale(),
+                                        -r.getValue(i+2) / getScale()),
+                                p));
                     }
                     canvas.drawPolygon(poly);
                 }

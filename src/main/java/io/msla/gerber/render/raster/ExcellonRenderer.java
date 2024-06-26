@@ -7,22 +7,20 @@ import io.msla.gerber.drl.holes.HoleRouted;
 import io.msla.gerber.render.raster.tools.Brush;
 import io.msla.gerber.render.raster.tools.Pen;
 
-import java.awt.*;
 import java.awt.geom.Point2D;
 
 public final class ExcellonRenderer extends LayerRenderer {
     private final GraphicsCanvas canvas;
-    private final Pen pen;
 
     public ExcellonRenderer(GraphicsCanvas canvas, Double scale, Point2D center) {
         super(scale, center);
         this.canvas = canvas;
-        this.pen = new Pen(Color.BLACK, 1.0);
     }
 
     @Override
-    public void draw(Layer layer, Point2D offset, Color color) {
+    public void draw(Layer layer, Point2D offset) {
         if (layer instanceof Excellon e) {
+            var pen = new Pen(getColor(), 1.0);
             var hi = e.holes();
             while (hi.hasNext()) {
                 var h = hi.next();
