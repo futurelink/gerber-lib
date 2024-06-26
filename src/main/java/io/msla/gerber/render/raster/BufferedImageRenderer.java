@@ -10,14 +10,27 @@ import java.awt.*;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
-public class BufferedImageRenderer {
+public final class BufferedImageRenderer {
     @Getter private BufferedImage image;
     private final int imageType;
     private final Double scale;
     private Point2D gerberCenter;
+
+    /**
+     * Add padding in millimeters around rendered image.
+     * Default padding is 0.5mm.
+     */
     @Setter private Double padding = 0.5;
-    private Integer width;
-    private Integer height;
+
+    /**
+     * Rendered image width.
+     */
+    @Getter private Integer width;
+
+    /**
+     * Rendered image height.
+     */
+    @Getter private Integer height;
 
     public BufferedImageRenderer(Double scale, int imageType) {
         this.scale = scale;
@@ -28,7 +41,15 @@ public class BufferedImageRenderer {
         this(scale, BufferedImage.TYPE_INT_ARGB);
     }
 
+    /**
+     * Renders layer data.
+     * @param layer layer data. Either Gerber or Excellon DRL.
+     * @param color color to draw geometry with.
+     */
     public void render(Layer layer, Color color) throws RenderException {
+        if (layer == null) throw new RenderException("Layer data can't be null");
+        if (color == null) throw new RenderException("Color can't be null");
+
         // New size of image
         if (width == null && layer.getWidth() != null) width = (int) Math.round((layer.getWidth() + (padding * 2)) / scale);
         if (height == null && layer.getHeight() != null) height = (int) Math.round((layer.getHeight() + (padding * 2)) / scale);
@@ -46,6 +67,7 @@ public class BufferedImageRenderer {
 
         tmpGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        // Handle Gerber data
         if (layer instanceof Gerber) {
             // Center offset is being taken from the first rendered Gerber layer,
             // usually it's edge cuts layer.
@@ -59,6 +81,7 @@ public class BufferedImageRenderer {
             gerberRenderer.draw(layer, new Point2D.Double(padding, -padding));
         }
 
+        // Handle Excellon DRL data
         else if (layer instanceof Excellon) {
             if (gerberCenter == null) throw new RenderException("Excellon DRL can only be rendered after Gerber layer");
             var drlRenderer = new ExcellonRenderer(canvas, scale, gerberCenter);
@@ -69,7 +92,8 @@ public class BufferedImageRenderer {
 
         // Compose images
         var graphics = image.createGraphics();
-        graphics.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, color.getAlpha() / 255.f));
+        if (color.getAlpha() < 255) graphics.setComposite(AlphaComposite.getInstance(
+                AlphaComposite.SRC_OVER, color.getAlpha() / 255.f));
         graphics.drawImage(tmpImage, 0, 0, null);
         graphics.dispose();
     }
