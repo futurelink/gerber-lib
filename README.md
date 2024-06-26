@@ -7,6 +7,9 @@ Pending features:
  - merging multiple Gerber batches (all layers) into one (nesting)
  - adding mouse-bites features into merged Gerber
 
+## Example of rendered image
+![Rendered image](sample/rendered_gerber.png)
+
 ## Short usage how-to:
 
 Read Gerber file:

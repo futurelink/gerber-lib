@@ -29,17 +29,26 @@ public class GerberTests extends Common {
 
     @Test
     void testReadAndRenderFile() throws IOException, GerberException, RenderException {
-        var reader = new GerberReader(new FileInputStream(resourceFile("gerbers/tiny1616_dev_board-B_Cu.gbr")));
-        var gerber = reader.read("Copper Back Title");
+        var reader = new GerberReader(new FileInputStream(resourceFile("gerbers/tiny1616_dev_board-Edge_Cuts.gbr")));
+        var gerber = reader.read("Edge cuts layer title");
+
+        var reader1 = new GerberReader(new FileInputStream(resourceFile("gerbers/tiny1616_dev_board-B_Cu.gbr")));
+        var gerber1 = reader1.read("Copper Back layer");
+
+        var reader2 = new GerberReader(new FileInputStream(resourceFile("gerbers/tiny1616_dev_board-F_Cu.gbr")));
+        var gerber2 = reader2.read("Copper Front layer");
 
         var drlReader = new ExcellonReader(new FileInputStream(resourceFile("gerbers/tiny1616_dev_board-PTH.drl")));
         var drl = drlReader.read("Top through holes");
 
         var renderer = new BufferedImageRenderer(0.02);
-        renderer.render(gerber, Color.ORANGE);
-        renderer.render(drl, Color.WHITE);
+        renderer.setPadding(1.0); // Add 1mm padding around a render
+        renderer.render(gerber, new Color(255, 255, 0, 170));
+        renderer.render(gerber1, new Color(0, 255, 0, 170));
+        renderer.render(gerber2, new Color(255, 0, 0, 170));
+        renderer.render(drl, new Color(0,0, 0));
 
         var image = renderer.getImage();
-        ImageIO.write(image, "png", new File("rendered_gerber.png"));
+        ImageIO.write(image, "png", new File("sample/rendered_gerber.png"));
     }
 }

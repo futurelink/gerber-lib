@@ -22,11 +22,8 @@ import java.util.HashMap;
 
 @Getter
 public final class GerberRenderer extends LayerRenderer {
-    private final GraphicsCanvas canvas;
     @Setter private HashMap<Integer, Aperture> apertures;
     @Setter private HashMap<String, Macro> macros;
-
-    private final static double arcQ = 2880 / Math.PI;
 
     static class ArcCache {
         private Point2D center;
@@ -37,24 +34,23 @@ public final class GerberRenderer extends LayerRenderer {
 
     private final HashMap<D01To03, ArcCache> arcCache;
 
-    public GerberRenderer(GraphicsCanvas canvas, Double scale, Point2D center) {
-        super(scale, center);
-        this.canvas = canvas;
+    public GerberRenderer(RenderCanvas canvas, Double scale, Point2D center) {
+        super(canvas, scale, center);
         this.arcCache = new HashMap<>();
     }
 
     @Override
-    public void draw(Layer layer, final Point2D offset, Color color) {
+    public void draw(Layer layer, final Point2D offset) {
         Aperture currentAperture = null;
         var currentInterpolation = Geometry.Interpolation.LINEAR;
         var currentPoint = new Point2D.Double(0, 0);
         var polygonMode = false;
         var polygonPoints = new ArrayList<Point2D>();
-        var brush = new Brush(color);
-        var pen = new Pen(color, 1.0);
+        var brush = new Brush(getColor());
+        var pen = new Pen(getColor(), 1.0);
 
-        canvas.setPen(null);
-        canvas.setBrush(null);
+        getCanvas().setPen(null);
+        getCanvas().setBrush(null);
 
         if (layer instanceof Gerber g) {
             for (var cmd : g.getContents()) {
@@ -66,21 +62,21 @@ public final class GerberRenderer extends LayerRenderer {
                                 if (polygonMode) {
                                     polygonPoints.add(translatedPoint(p, offset));
                                 } else {
-                                    canvas.setPen(pen);
+                                    getCanvas().setPen(pen);
                                     drawApertureLine(translatedPoint(currentPoint, offset), translatedPoint(p, offset), currentAperture);
-                                    canvas.setPen(null);
+                                    getCanvas().setPen(null);
                                 }
                             } else {
-                                canvas.setPen(pen);
+                                getCanvas().setPen(pen);
                                 drawApertureArc(currentPoint, currentInterpolation, offset, currentAperture, d);
-                                canvas.setPen(null);
+                                getCanvas().setPen(null);
                             }
                             break;
                         case 3:
                             if (apertures != null) {
-                                canvas.setBrush(brush);
+                                getCanvas().setBrush(brush);
                                 drawAperture(translatedPoint(p, offset), currentAperture, macros);
-                                canvas.setBrush(null);
+                                getCanvas().setBrush(null);
                             }
                             break;
                         default:
@@ -100,9 +96,9 @@ public final class GerberRenderer extends LayerRenderer {
                         polygonMode = true;
                     } else if (gcode.getCode() == 37) {
                         if (polygonMode) {
-                            canvas.setBrush(brush);
-                            canvas.drawPolygon(polygonPoints.toArray(Point2D[]::new));
-                            canvas.setBrush(null);
+                            getCanvas().setBrush(brush);
+                            getCanvas().drawPolygon(polygonPoints.toArray(Point2D[]::new));
+                            getCanvas().setBrush(null);
                             polygonMode = false;
                         }
                     }
@@ -136,21 +132,21 @@ public final class GerberRenderer extends LayerRenderer {
 
         var arcRect = new Rectangle2D.Double(
                 (c.center.getX() - c.radius + getCenter().getX() + ((offset != null) ? offset.getX() : 0)) / getScale(),
-                -(c.center.getY() - c.radius - getCenter().getY() + ((offset != null) ? offset.getY() : 0)) / getScale(),
-                c.radius * 2 / getScale(), -c.radius * 2 / getScale());
+                -(c.center.getY() + c.radius - getCenter().getY() + ((offset != null) ? offset.getY() : 0)) / getScale(),
+                c.radius * 2 / getScale(), c.radius * 2 / getScale());
 
-        var pen = new Pen(canvas.getPen());
+        var pen = new Pen(getCanvas().getPen());
         if (aperture != null) pen.setWidth(aperture.getMeasures().get(0) / getScale());
-        canvas.setPen(pen);
-        canvas.drawArc(arcRect, (int) (c.angStart * arcQ), (int) (c.angSpan * arcQ));
-        canvas.setPen(null);
+        getCanvas().setPen(pen);
+        getCanvas().drawArc(arcRect, c.angStart, c.angSpan);
+        getCanvas().setPen(null);
     }
 
     public void drawApertureLine(final Point2D start, final Point2D end, final Aperture aperture) {
-        var pen = new Pen(canvas.getPen());
+        var pen = new Pen(getCanvas().getPen());
         if (aperture != null) pen.setWidth(aperture.getMeasures().get(0) / getScale());
-        canvas.setPen(pen);
-        canvas.drawLine(start, end);
+        getCanvas().setPen(pen);
+        getCanvas().drawLine(start, end);
     }
 
     public void drawAperture(final Point2D p, final Aperture a, final HashMap<String, Macro> macros) {
@@ -159,18 +155,18 @@ public final class GerberRenderer extends LayerRenderer {
         switch (a.getMacro()) {
             case "C" -> {   // Circle
                 var radius = a.getMeasures().get(0) / getScale() / 2;
-                canvas.drawEllipse(p, radius, radius);
+                getCanvas().drawEllipse(p, radius, radius);
             }
             case "O" ->     // Oval
-                    canvas.drawEllipse(p, a.getMeasures().get(0) / getScale() / 2, a.getMeasures().get(1) / getScale() / 2);
+                    getCanvas().drawEllipse(p, a.getMeasures().get(0) / getScale() / 2, a.getMeasures().get(1) / getScale() / 2);
 
             case "R" -> {   // Rectangle
                 var rx = a.getMeasures().get(0) / getScale() / 2;
                 var ry = a.getMeasures().get(1) / getScale() / 2;
-                canvas.drawRect(new Rectangle2D.Double(p.getX() - rx, p.getY() - ry, rx * 2, ry * 2));
+                getCanvas().drawRect(new Rectangle2D.Double(p.getX() - rx, p.getY() - ry, rx * 2, ry * 2));
             }
             default ->      // Macro name
-                    drawMacro(p, macros.get(a.getMacro()), a.getMeasures().toArray(Double[]::new), canvas.getBrush().getColor());
+                    drawMacro(p, macros.get(a.getMacro()), a.getMeasures().toArray(Double[]::new), getCanvas().getBrush().getColor());
         }
     }
 
@@ -180,23 +176,31 @@ public final class GerberRenderer extends LayerRenderer {
             switch (r.getType()) {
                 case Circle -> {
                     var dia = r.getValue(0) / getScale() / 2;
-                    var center = addPoints(new Point2D.Double(r.getValue(1) / getScale(), -r.getValue(2) / getScale()), p);
-                    canvas.drawEllipse(center, dia, dia);
+                    var center = addPoints(
+                            new Point2D.Double(
+                                    r.getValue(1) / getScale(),
+                                    -r.getValue(2) / getScale()),
+                            p);
+                    getCanvas().drawEllipse(center, dia, dia);
                 }
                 case Outline -> {
                     var poly = new Polygon();
-                    for (var i = 0; i < r.getValue(0) * 2; i+=2) {
-                        poly.append(addPoints(new Point2D.Double(r.getValue(i+1) / getScale(), -r.getValue(i+2) / getScale()), p));
+                    for (var i = 0; i < r.getValue(0) * 2; i += 2) {
+                        poly.append(addPoints(
+                                new Point2D.Double(
+                                        r.getValue(i + 1) / getScale(),
+                                        -r.getValue(i + 2) / getScale()),
+                                p));
                     }
-                    canvas.drawPolygon(poly);
+                    getCanvas().drawPolygon(poly);
                 }
                 case VectorLine -> {
-                    var prevPen = canvas.getPen();
-                    canvas.setPen(new Pen(color, r.getValue(0) / getScale()));
-                    canvas.drawLine(
+                    var prevPen = getCanvas().getPen();
+                    getCanvas().setPen(new Pen(color, r.getValue(0) / getScale()));
+                    getCanvas().drawLine(
                             addPoints(new Point2D.Double(r.getValue(1) / getScale(), -r.getValue(2) / getScale()), p),
                             addPoints(new Point2D.Double(r.getValue(3) / getScale(), -r.getValue(4) / getScale()), p));
-                    canvas.setPen(prevPen);
+                    getCanvas().setPen(prevPen);
                 }
             }
         }
