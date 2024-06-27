@@ -52,6 +52,9 @@ public final class GerberRenderer extends LayerRenderer {
         getCanvas().setPen(null);
         getCanvas().setBrush(null);
 
+        // Has no graphics, nothing to render
+        if (!layer.isHasGraphics()) return;
+
         if (layer instanceof Gerber g) {
             for (var cmd : g.getContents()) {
                 if (cmd instanceof D01To03 d) {

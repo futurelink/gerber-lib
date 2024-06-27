@@ -41,6 +41,7 @@ public class Gerber extends Layer {
             if (d.getY() < minY) minY = d.getY();
             if (d.getX() > maxX) maxX = d.getX();
             if (d.getY() > maxY) maxY = d.getY();
+            setHasGraphics(true);
         }
         Commands.add(cmd);
     }

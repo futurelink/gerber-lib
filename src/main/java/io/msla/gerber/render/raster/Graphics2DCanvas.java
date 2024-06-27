@@ -55,18 +55,18 @@ public class Graphics2DCanvas implements RenderCanvas {
         var angleStartDeg = (int) Math.round(angleStart / Math.PI * 180.0);
         var angleSpanDeg = (int) Math.round(angleSpan / Math.PI * 180.0);
         if (pen != null) {
-            logger.info("Arc " + rect.toString() + " - " +
-                    angleStart + " (" + angleStartDeg + " deg) spans " +
-                    angleSpan + " (" + angleSpanDeg + " deg)");
-            graphics.setColor(pen.getColor());
-            graphics.setStroke(pen.getStroke());
-            graphics.drawArc(
-                    (int) Math.round(rect.getX()), (int) Math.round(rect.getY()),
-                    (int) Math.round(rect.getWidth()), (int) Math.round(rect.getHeight()),
-                    angleStartDeg, angleSpanDeg);
-        } else {
-            logger.warning("Arc should have been drawn, but no pen set");
-        }
+            if (angleSpanDeg != 0) {
+                logger.fine("Arc " + rect.toString() + " - " +
+                        angleStart + " (" + angleStartDeg + " deg) spans " +
+                        angleSpan + " (" + angleSpanDeg + " deg)");
+                graphics.setColor(pen.getColor());
+                graphics.setStroke(pen.getStroke());
+                graphics.drawArc(
+                        (int) Math.round(rect.getX()), (int) Math.round(rect.getY()),
+                        (int) Math.round(rect.getWidth()), (int) Math.round(rect.getHeight()),
+                        angleStartDeg, angleSpanDeg);
+            } else logger.warning("Arc should have been drawn, but angle span is zero");
+        } else logger.warning("Arc should have been drawn, but no pen set");
     }
 
     public void drawLine(Point2D start, Point2D end) {
@@ -77,9 +77,7 @@ public class Graphics2DCanvas implements RenderCanvas {
             graphics.drawLine(
                     (int) Math.round(start.getX()), (int) Math.round(start.getY()),
                     (int) Math.round(end.getX()), (int) Math.round(end.getY()));
-        } else {
-            logger.warning("Line should have been drawn, but no pen set");
-        }
+        } else logger.warning("Line should have been drawn, but no pen set");
     }
 
     public void drawEllipse(Point2D center, Double radius1, Double radius2) {

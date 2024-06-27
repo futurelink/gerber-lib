@@ -17,6 +17,9 @@ public final class ExcellonRenderer extends LayerRenderer {
 
     @Override
     public void draw(Layer layer, Point2D offset) {
+        // Has no graphics, nothing to render
+        if (!layer.isHasGraphics()) return;
+
         if (layer instanceof Excellon e) {
             var pen = new Pen(getColor(), 1.0);
             var hi = e.holes();

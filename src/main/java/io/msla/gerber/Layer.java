@@ -1,6 +1,7 @@
 package io.msla.gerber;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 abstract public class Layer {
@@ -9,6 +10,7 @@ abstract public class Layer {
     protected double minX = 99999;
     protected double maxY = -99999;
     protected double minY = 99999;
+    @Setter private boolean hasGraphics = false;
 
     public enum Type {
         FrontCopper, FrontMask, FrontPaste, FrontSilk,

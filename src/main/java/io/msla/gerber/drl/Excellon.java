@@ -17,6 +17,7 @@ public class Excellon extends Layer {
 
     public final void addHole(Hole h) {
         holes.add(h);
+        setHasGraphics(true);
     }
 
     public final Iterator<? extends Hole> holes() {

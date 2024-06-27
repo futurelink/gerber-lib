@@ -116,8 +116,10 @@ public class GerberReader {
 
         log.log(Level.INFO, "Gerber file read, {0} commands", new Object[] { cmdCount });
         log.log(Level.INFO, "Board size is {0} x {1}", new Object[] { gerber.getWidth(), gerber.getHeight() });
-        log.log(Level.INFO, "Minimum edge is {0} x {1}, maximum edge is {2} x {3}",
-                new Object[] { gerber.getMinX(), gerber.getMinY(), gerber.getMaxX(), gerber.getMaxY() });
+        if (gerber.isHasGraphics()) {
+            log.log(Level.INFO, "Minimum edge is {0} x {1}, maximum edge is {2} x {3}",
+                    new Object[]{gerber.getMinX(), gerber.getMinY(), gerber.getMaxX(), gerber.getMaxY()});
+        } else log.info("Gerber file has been read, but it has no graphics");
         return gerber;
     }
 
