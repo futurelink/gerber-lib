@@ -56,6 +56,7 @@ public class GerberTests extends Common {
 
         var renderer = new BufferedImageRenderer(0.02);
         renderer.setPadding(1.0); // Add 1mm padding around a render
+        renderer.setRotate(BufferedImageRenderer.Rotate.Rotate90CW);
         renderer.render(gerber, new Color(255, 255, 0, 170));
         renderer.render(gerber1, new Color(0, 255, 0, 170));
         renderer.render(gerber2, new Color(255, 0, 0, 170));
@@ -63,5 +64,20 @@ public class GerberTests extends Common {
 
         var image = renderer.getImage();
         ImageIO.write(image, "png", new File("sample/rendered_gerber.png"));
+    }
+
+    @Test
+    void testRenderRotateFile() throws IOException, GerberException, RenderException {
+        var reader1 = new GerberReader(new FileInputStream(resourceFile("gerbers/tiny1616_dev_board-B_Cu.gbr")));
+        var gerber1 = reader1.read("Copper Back layer");
+        assertTrue(gerber1.isHasGraphics());
+
+        var renderer = new BufferedImageRenderer(0.02);
+        renderer.setPadding(1.0); // Add 1mm padding around a render
+        renderer.setRotate(BufferedImageRenderer.Rotate.Rotate90CW);
+        renderer.render(gerber1, new Color(0, 255, 0, 170));
+
+        var image = renderer.getImage();
+        ImageIO.write(image, "png", new File("sample/rendered_gerber_rotated.png"));
     }
 }

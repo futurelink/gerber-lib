@@ -1,6 +1,7 @@
 package io.msla.gerber.render.raster;
 
 import io.msla.gerber.Layer;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -33,7 +34,6 @@ abstract public class LayerRenderer {
     protected Point2D translatedPoint(Point2D p, Point2D offset) {
         return translatedPoint(p.getX(), p.getY(), offset);
     }
-
     protected Point2D translatedPoint(Double x, Double y) {
         return translatedPoint(x, y, null);
     }

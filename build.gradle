@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.msla'
-version = '0.1.2'
+version = '0.1.3-' + new Date().format('yyyyMMddHHmmss')
 
 repositories {
     mavenCentral()
@@ -20,7 +20,7 @@ compileTestJava {
 
 jar {
     archiveBaseName = 'gerber-lib'
-    archiveVersion = project.version
+    archiveVersion.set((String) project.version)
 }
 
 dependencies {
