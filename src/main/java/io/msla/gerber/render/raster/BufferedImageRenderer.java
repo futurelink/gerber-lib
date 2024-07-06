@@ -12,8 +12,8 @@ import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
 public final class BufferedImageRenderer {
-    public enum Mirror { NoMirror, MirrorX, MirrorY };
-    public enum Rotate { NoRotate, Rotate90CW, Rotate90CCW };
+    public enum Mirror { NoMirror, MirrorX, MirrorY }
+    public enum Rotate { NoRotate, Rotate90CW, Rotate90CCW }
 
     private BufferedImage image;
     private final int imageType;

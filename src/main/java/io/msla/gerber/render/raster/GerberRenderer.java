@@ -127,9 +127,13 @@ public final class GerberRenderer extends LayerRenderer {
         c.center = new Point2D.Double(currentPoint.getX() + d.getI(), currentPoint.getY() + d.getJ());
         c.radius = Math.sqrt(Math.pow(currentPoint.getX() - c.center.getX(), 2) + Math.pow(currentPoint.getY() - c.center.getY(), 2));
         c.angStart = Math.atan2(currentPoint.getY() - c.center.getY(), currentPoint.getX() - c.center.getX());
-        var ang2 = Math.atan2(d.getY() - c.center.getY(), d.getX() - c.center.getX());
-        if ((interpolation == Geometry.Interpolation.CCW) && (ang2 < 0)) ang2 = ang2 + 2 * Math.PI;
-        c.angSpan = ang2 - c.angStart;
+        var angleEnd = Math.atan2(d.getY() - c.center.getY(), d.getX() - c.center.getX());
+        if ((interpolation == Geometry.Interpolation.CCW)) {
+            if (angleEnd < 0) angleEnd += 2 * Math.PI;
+            else if (angleEnd == 0 && c.angStart < 0) angleEnd = 2 * Math.PI;
+            if (c.angStart < -0.00001) c.angStart += 2 * Math.PI; // Threshold 0.00001 is needed to determine angle correctly
+        }
+        c.angSpan = angleEnd - c.angStart;
         arcCache.put(d, c);
         //}
 

@@ -65,7 +65,7 @@ public class Graphics2DCanvas implements RenderCanvas {
                         (int) Math.round(rect.getX()), (int) Math.round(rect.getY()),
                         (int) Math.round(rect.getWidth()), (int) Math.round(rect.getHeight()),
                         angleStartDeg, angleSpanDeg);
-            } else logger.warning("Arc should have been drawn, but angle span is zero");
+            } else logger.warning("Arc should have been drawn, but angle span is zero or 360 degrees");
         } else logger.warning("Arc should have been drawn, but no pen set");
     }
 

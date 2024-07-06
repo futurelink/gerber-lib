@@ -1,7 +1,6 @@
 package io.msla.gerber.render.raster;
 
 import io.msla.gerber.Layer;
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 

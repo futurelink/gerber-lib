@@ -29,7 +29,7 @@ public class GerberTests extends Common {
     }
 
     @Test
-    void testReadNoGraphicsFile() throws IOException, GerberException, RenderException {
+    void testReadNoGraphicsFile() throws IOException, GerberException {
         var reader = new GerberReader(new FileInputStream(resourceFile("gerbers/hldi-B_Paste.gbr")));
         var gerber = reader.read("Back paste title");
         assertEquals(2, gerber.getContents().size());
@@ -56,7 +56,6 @@ public class GerberTests extends Common {
 
         var renderer = new BufferedImageRenderer(0.02);
         renderer.setPadding(1.0); // Add 1mm padding around a render
-        renderer.setRotate(BufferedImageRenderer.Rotate.Rotate90CW);
         renderer.render(gerber, new Color(255, 255, 0, 170));
         renderer.render(gerber1, new Color(0, 255, 0, 170));
         renderer.render(gerber2, new Color(255, 0, 0, 170));
@@ -79,5 +78,19 @@ public class GerberTests extends Common {
 
         var image = renderer.getImage();
         ImageIO.write(image, "png", new File("sample/rendered_gerber_rotated.png"));
+    }
+
+    @Test
+    void testRenderArcs0And360() throws IOException, GerberException, RenderException {
+        var reader1 = new GerberReader(new FileInputStream(resourceFile("gerbers/hldi-Edge_Cuts.gbr")));
+        var gerber1 = reader1.read("Edge cuts");
+        assertTrue(gerber1.isHasGraphics());
+
+        var renderer = new BufferedImageRenderer(0.02);
+        renderer.setPadding(1.0); // Add 1mm padding around a render
+        renderer.render(gerber1, new Color(0, 255, 0, 170));
+
+        var image = renderer.getImage();
+        ImageIO.write(image, "png", new File("sample/rendered_edge_cuts.png"));
     }
 }
